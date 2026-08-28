@@ -1,3 +1,45 @@
+# Loan Risk API
+
+A full-stack application that evaluates loan applications and returns a risk-based approval decision, built to demonstrate real-world fintech engineering practices: clean API design, rule-based risk scoring, JWT authentication, and auditability.
+
+## Overview
+
+This project simulates a simplified loan underwriting system. Applicants submit their financial details through an API (and a web UI), and the system calculates a risk score (0–100) based on credit score, debt-to-income ratio, employment stability, and loan-to-income ratio. Based on that score, the system returns one of three decisions: **APPROVE**, **MANUAL_REVIEW**, or **REJECT**, along with a human-readable breakdown of why.
+
+Every evaluation is stored, so applicants (and reviewers) can look back at decision history — a pattern common in real fintech/banking systems where auditability matters as much as the decision itself.
+
+## Tech Stack
+
+**Backend**
+- Java 17
+- Spring Boot 3.x (Web, Data JPA, Security, Validation, Actuator)
+- PostgreSQL
+- JWT (jjwt) for stateless authentication
+- springdoc-openapi (Swagger UI) for live API docs
+- JUnit 5 + Mockito for testing
+- Maven
+
+**Frontend**
+- React
+- Axios for API calls
+
+**Infrastructure**
+- Docker & Docker Compose
+- GitHub Actions (CI: build + test on every push)
+- Render (backend + database hosting)
+- Vercel (frontend hosting)
+
+## Architecture
+
+┌─────────────┐ REST/JSON ┌──────────────────┐ JPA ┌──────────────┐
+│ React │ ──────────────────────> │ Spring Boot │ ────────────────> │ PostgreSQL │
+│ Frontend │ <────────────────────── │ API │ <──────────────── │ │
+└─────────────┘ JWT auth └──────────────────┘ └──────────────┘
+│
+▼
+Risk Scoring Engine
+(rule-based, in-service)
+
 
 - **Controller layer** — handles HTTP requests/responses, input validation
 - **Service layer** — business logic, including the risk scoring engine
@@ -43,9 +85,9 @@ Full interactive API docs available via Swagger UI at `/swagger-ui.html` once th
 ### Run the backend
 ```bash
 cd backend
-./mvnw spring-boot:run
+mvn spring-boot:run
 ```
-The API will be available at `http://localhost:8080`. By default it uses an in-memory H2 database — no setup needed.
+By default, this connects to the environment variables described below. For local development without a database set up, the app can also be configured to use an in-memory H2 database.
 
 ### Run the frontend
 ```bash
@@ -64,17 +106,18 @@ This spins up the backend, frontend, and a PostgreSQL database together.
 ## Running Tests
 ```bash
 cd backend
-./mvnw test
+mvn test
 ```
 
 ## Environment Variables
 
-| Variable | Description | Default |
-|---|---|---|
-| `DB_URL` | Database connection URL | H2 in-memory |
-| `DB_USER` | Database username | `sa` |
-| `DB_PASSWORD` | Database password | (empty) |
-| `JWT_SECRET` | Secret key for signing JWTs | dev default (change in prod) |
+| Variable | Description |
+|---|---|
+| `DB_URL` | JDBC database connection URL |
+| `DB_USER` | Database username |
+| `DB_PASSWORD` | Database password |
+| `DB_DRIVER` | JDBC driver class (`org.postgresql.Driver`) |
+| `JWT_SECRET` | Secret key for signing JWTs |
 
 ## CI/CD
 
@@ -82,13 +125,19 @@ GitHub Actions runs the test suite on every push and pull request to `main`. See
 
 ## Live Demo
 
-> _To be added once deployed._
+- Frontend: https://loan-risk-api-frontend.vercel.app
+- Backend API: https://loan-risk-backend-ap6q.onrender.com
+- Swagger docs: https://loan-risk-backend-ap6q.onrender.com/swagger-ui.html
 
-- Frontend: TBD
-- Backend API: TBD
-- Swagger docs: TBD
+> Note: the backend is hosted on a free tier and may take 30–50 seconds to respond on first load if it has been idle. Subsequent requests will be fast.
 
 ## Project Structure
+
+loan-risk-api/
+├── backend/ # Spring Boot API
+├── frontend/ # React app
+├── docker-compose.yml
+└── .github/workflows/ci.yml
 
 
 ## Author
